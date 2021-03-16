@@ -150,37 +150,22 @@ function u = take_action(a, par)
 end
 
 function r = observe_reward(a, sP, par)
-    % TOREVIEW: Calculate the reward for taking action a,
-    % TOREVIEW: resulting in state sP.
-    % take previous state if reward is never reached due to terminal state
+    % TODO: Calculate the reward for taking action a,
+    % TODO: resulting in state sP.
     if sP == 16
         r = 1;
-    else
-        r = 0;
+        
     end
 end
 
 function t = is_terminal(sP, par)
-    % TOREVIEW: Return 1 if state sP is terminal, 0 otherwise.
-    % same as reward, since we don't want to learn how to balance, we want
-    % to learn how to swing upwards
-    if sP == 16
-        t = 1;
-    else
-        t = 0;
-    end
+    % TODO: Return 1 if state sP is terminal, 0 otherwise.
 end
 
 
 function a = execute_policy(Q, s, par)
     % TODO: Select an action for state s using the
     % TODO: epsilon-greedy algorithm.
-    p = rand(1);    % some random prob
-    if p < par.epsilon
-        a = randi([1 par.actions]);
-    else
-        [~,a] = max(Q);     % first arg = value and 2nd arg = index
-    end    
 end
 
 function Q = update_Q(Q, s, a, r, sP, aP, par)
