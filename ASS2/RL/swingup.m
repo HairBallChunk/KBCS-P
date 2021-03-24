@@ -10,7 +10,8 @@ function [par, ta, xa] = swingup(par)
         % Obtain SARSA parameters
         par = get_parameters(par);
         
-		% TODO: Initialize the outer loop
+		% TOREVIEW: Initialize the outer loop
+        Q = init_Q(par);
 
         % Initialize bookkeeping (for plotting only)
         ra = zeros(par.trials, 1);
@@ -20,12 +21,16 @@ function [par, ta, xa] = swingup(par)
         % Outer loop: trials
         for ii = 1:par.trials
 
-            % TODO: Initialize the inner loop
+            % TOREVIEW: Initialize the inner loop
+            x = swingup_initial_state();
+            s = discretize_state(x, par);
+            a = execute_policy(Q, s, par);
 
             % Inner loop: simulation steps
             for tt = 1:ceil(par.simtime/par.simstep)
                 
-                % TODO: obtain torque
+                % TOREVIEW: obtain torque
+                u = take_action(a, par);
                 
                 % Apply torque and obtain new state
                 % x  : state (input at time t and output at time t+par.simstep)
@@ -33,13 +38,28 @@ function [par, ta, xa] = swingup(par)
                 % te : new time
                 [te, x] = body_straight([te te+par.simstep],x,u,par);
 
-                % TODO: learn
+                % TOREVIEW: learn
                 % use s for discretized state
+                sP = discretize_state(x, par);
+                r = observe_reward(a, sP, par);
+                
+                aP = execute_policy(Q, sP, par);
+                
+                
+                Q = update_Q(Q, s, a, r, sP, aP, par);
+                
+                s = sP;
+                a = aP;
                 
                 % Keep track of cumulative reward
-                ra(ii) = ra(ii)+reward;
+                ra(ii) = ra(ii)+r;
 
-                % TODO: check termination condition
+                % TOREVIEW: check termination condition
+                t = is_terminal(s, par);
+                if t 
+                    break
+                end
+                
             end
 
             tta(ii) = tta(ii) + tt*par.simstep;
@@ -83,6 +103,7 @@ function [par, ta, xa] = swingup(par)
             % Save trace
             ta(tt) = te;
             xa(tt, :) = x;
+            %te         % takes care of task 2.7a
 
             s = discretize_state(x, par);
             a = execute_policy(Q, s, par);
@@ -116,9 +137,10 @@ end
 % *** Edit below this line                                       ***
 % ******************************************************************
 function par = get_parameters(par)
-    % TODO: set the values
+    % TOREVIEW: set the values
     par.epsilon = 0.1;        % Random action rate
-    par.gamma = 0.99;       % Discount rate
+    %par.gamma = 0.99;       % Discount rate
+    par.gamma = 0.99;       % for Task 2.7d
     par.alpha = 0.25;          % Learning rate
     par.pos_states = 31;     % Position discretization
     par.vel_states = 31;     % Velocity discretization
@@ -173,17 +195,27 @@ end
 
 
 function a = execute_policy(Q, s, par)
-    % TODO: Select an action for state s using the
-    % TODO: epsilon-greedy algorithm.
+    % TOREVIEW: Select an action for state s using the
+    % TOREVIEW: epsilon-greedy algorithm.
     p = rand(1);    % some random prob
     if p < par.epsilon
         a = randi([1 par.actions]);
     else
-        [~,a] = max(Q);     % first arg = value and 2nd arg = index
-    end    
+        % could give problems once there are multiple entries with max
+        % value
+        Q = Q(s(1),s(2),:);         % only look at optimum action for current state
+        M = max(Q,[],[1 2]);        % calculates maximum Q value per action channel
+        [~,a] = max(M);              % first arg = value and 2nd arg = index
+        
+    end 
+    % For task 2.7c
+    %Q = Q(s(1),s(2),:);         % only look at optimum action for current state
+    %M = max(Q,[],[1 2]);        % calculates maximum Q value per action channel
+    %[~,a] = max(M);              % first arg = value and 2nd arg = index
 end
 
 function Q = update_Q(Q, s, a, r, sP, aP, par)
-    % TODO: Implement the SARSA update rule.
+    % TOREVIEW: Implement the SARSA update rule.
+    Q(s(1),s(2),a) = Q(s(1),s(2),a) + par.alpha*(r + par.gamma*Q(sP(1),sP(2),aP) - Q(s(1),s(2),a));
 end
 

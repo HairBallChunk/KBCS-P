@@ -7,5 +7,5 @@ function assignment
     par.run_type = 'test';
     [par, ta, xa] = swingup(par);
     
-    animate_swingup(ta, xa, par)
+    %animate_swingup(ta, xa, par)       % for task 2.7c
 end
