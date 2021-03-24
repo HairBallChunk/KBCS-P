@@ -8,6 +8,9 @@ function tau_ff = ff_yours(th_curr, th_d_curr, th_des, th_d_des, th_dd_des, your
 %     [x_des, x_d_des, x_dd_des, ~] = FK(th_des, th_d_des, th_dd_des, rp);
 %     and this is the only purpose for which you are allowed to use the
 %     robot parameters rp.
-%     
-    tau_ff = [0; 0];
+
+     inputs = [th_d_des ; th_dd_des ] ;
+     load NeuralNetworkQ3
+     tau_ff = NeuralNetworkQ3(inputs);
+
 end
